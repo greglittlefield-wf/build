@@ -1,3 +1,7 @@
+## 0.2.7
+
+- Fix Dart 2 type errors.
+
 ## 0.2.6+2
 
 - Restore error for missing default target.

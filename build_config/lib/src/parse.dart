@@ -74,11 +74,28 @@ const _builderConfigDefaultOptions = const [
 
 BuildConfig parseFromYaml(
         String packageName, Iterable<String> dependencies, String configYaml) =>
-    parseFromMap(packageName, dependencies,
-        loadYaml(configYaml) as Map<String, dynamic> ?? {});
+    parseFromMap(packageName, dependencies, loadYaml(configYaml) as YamlMap);
 
-BuildConfig parseFromMap(String packageName,
-    Iterable<String> packageDependencies, Map<String, dynamic> config) {
+Object _logValue(Object value, int depth) {
+  if (value is Map) {
+    return _logMap(value, depth);
+  } else if (value is List) {
+    return _logList(value, depth);
+  } else {
+    return value;
+  }
+}
+
+Map<String, dynamic> _logMap(Map map, int depth) =>
+    map.map((k, v) => new MapEntry(k as String, _logValue(v, depth + 1)));
+
+List _logList(List<Object> list, int depth) =>
+    new List.generate(list.length, (i) => _logValue(list[i], depth + 1));
+
+BuildConfig parseFromMap(
+    String packageName, Iterable<String> packageDependencies, Map config) {
+  config = _logMap(config, 0);
+
   assert(packageName != null);
   assert(packageDependencies != null);
 
@@ -87,7 +104,7 @@ BuildConfig parseFromMap(String packageName,
   final postProcessBuilderDefinitions =
       <String, PostProcessBuilderDefinition>{};
 
-  final targetConfigs = config['targets'] as Map<String, Map> ?? {};
+  final targetConfigs = config['targets'] as Map<String, dynamic> ?? {};
   for (var targetName in targetConfigs.keys) {
     var targetConfig = _readMapOrThrow(
         targetConfigs, targetName, _targetOptions, 'target `$targetName`');
@@ -129,7 +146,7 @@ BuildConfig parseFromMap(String packageName,
         '$packageName or `\$default`');
   }
 
-  final builderConfigs = config['builders'] as Map<String, Map> ?? {};
+  final builderConfigs = config['builders'] as Map<String, dynamic> ?? {};
   for (var builderName in builderConfigs.keys) {
     final builderConfig = _readMapOrThrow(builderConfigs, builderName,
         _builderDefinitionOptions, 'builder `$builderName`',
