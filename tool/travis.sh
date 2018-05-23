@@ -16,6 +16,8 @@ pub upgrade || exit $?
 
 EXIT_CODE=0
 
+export DART_VM_OPTIONS=--preview-dart-2
+
 while (( "$#" )); do
   TASK=$1
   case $TASK in
